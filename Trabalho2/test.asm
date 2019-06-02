@@ -1,7 +1,7 @@
 section .data
-    msg db "msg.txt", 0         ;arquivo de com a mensagem que sera encriptada
+    msg db "msg.txt", 0                         ;arquivo de com a mensagem que sera encriptada
     len equ $-msg
-    key db "chave.txt", 0       ;arquivo com a chave de encriptacao e decriptacao
+    key db "chave.txt", 0                       ;arquivo com a chave de encriptacao e decriptacao
     lenk equ $-key
     matriz db "abcdefghijklmnopqrstuvwxyz",     ;linha1
            db "bcdefghijklmnopqrstuvwxyza",     ;linha2
@@ -32,38 +32,38 @@ section .data
     tam equ $-matriz
 
 section .bss 
-    buffer: resb 1024 
-    kbuffer: resb 1024
-    keyExtend: resb 1024
+    buffer resb len
+    kbuffer resb lenk
+    keyExtend resb len
 
 section .text
 global _start
 
 _start:
     ;printar array
-    mov esi, matriz
-    mov edi, tam-1
-    printArray:                ;show array
-    mov edx, 1
-    mov ecx, [esi]
-    ;add ecx, 48                ;para converter pra ascii
-    push ecx
-    mov ecx, esp
-    mov ebx, 1
-    mov eax, 4
-    int 80h
-    pop ecx
-    inc esi
-    dec edi
-    jns printArray
+    ;mov esi, matriz
+    ;mov edi, tam-1
+    ;printArray:                                ;show array
+    ;mov edx, 1
+    ;mov ecx, [esi]
+    ;add ecx, 48                                ;para converter pra ascii
+    ;push ecx
+    ;mov ecx, esp
+    ;mov ebx, 1
+    ;mov eax, 4
+    ;int 80h
+    ;pop ecx
+    ;inc esi
+    ;dec edi
+    ;jns printArray
 
-    openMSG:                    ;open file for reading
-    mov ebx, msg                ; name of the msg  
+    openMSG:                                    ;open file for reading
+    mov ebx, msg                                ; name of the msg  
     mov eax, 5  
     mov ecx, 0  
     int 80h    
 
-    readMSG:                    ;read from file
+    readMSG:                                    ;read from file
     mov eax, 3  
     mov ebx, eax
     mov ecx, buffer 
@@ -72,12 +72,12 @@ _start:
     call close
 
     openKEY:
-    mov ebx, key                ; name of the msg  
+    mov ebx, key                                ; name of the msg  
     mov eax, 5  
     mov ecx, 0  
     int 80h  
 
-    readKEY:                    ;read from file
+    readKEY:                                    ;read from file
     mov eax, 3  
     mov ebx, eax
     mov ecx, kbuffer
@@ -85,19 +85,21 @@ _start:
     int 80h
     call close
     
-    mov esi, 0                  ;percorrer o array da chave
-    mov edx, lenk               ;tamanho da chave
-    mov ecx, len                ;tamanho da mensagem
+    mov esi, 0                                  ;percorrer o array da chave
+    mov edi, 0
+    mov edx, lenk                               ;tamanho da chave
+    mov ecx, len                                ;tamanho da mensagem
     copy:
-    mov edi, [kbuffer+esi]      ;move para edi caracter por caracter
-    mov [keyExtend+esi], edi    ;move para key extend o caracter pego em cada iteração
+    mov ebx, [kbuffer+edi]                      ;move para edi caracter por caracter
+    mov [keyExtend+esi], ebx                    ;move para key extend o caracter pego em cada iteração
     cmp ecx, 0
     je displayBuffer
     dec ecx
     inc esi
+    inc edi
     jmp copy
 
-    displayBuffer:              ;write the message indicating end of file
+    displayBuffer:                              ;write the message indicating end of file
     mov eax, 4  
     mov ebx, 1
     mov ecx, keyExtend
@@ -105,12 +107,12 @@ _start:
     int 80h
     call exit
 
-    close:                      ;close the file
+    close:                                      ;close the file
     mov eax, 6  
     int 80h
     ret
 
-    exit:                       ;exit program
+    exit:                                       ;exit program
     mov eax, 1  
     mov ebx, 0 
     int 80h
