@@ -1,11 +1,11 @@
-all: test
+all: trab
 
-test.o:
-	nasm -f elf test.asm
+trab.o:
+	nasm -f elf trab.asm
 
-test: test.o
-	ld -m elf_i386 -s -o test test.o
+trab: trab.o
+	ld -m elf_i386 -s -o trab trab.o
 
 clean:
-	@rm -f *.o test
+	@rm -f *.o trab
 
