@@ -2,54 +2,34 @@ section .data
     msg db "msg.txt",0        ;arquivo de com a mensagem que sera encriptada
     key db "key.txt",0      ;arquivo com a chave de encriptacao e decriptacao
     file_out db "saida.txt",0
-    matriz db "abcdefghijklmnopqrstuvwxyz",     ;linha1
-           db "bcdefghijklmnopqrstuvwxyza",     ;linha2
-           db "cdefghijklmnopqrstuvwxyzab",     ;linha3
-           db "defghijklmnopqrstuvwxyzabc",     ;linha4
-           db "efghijklmnopqrstuvwxyzabcd",     ;linha5
-           db "fghijklmnopqrstuvwxyzabcde",     ;linha6
-           db "ghijklmnopqrstuvwxyzabcdef",     ;linha7
-           db "hijklmnopqrstuvwxyzabcdefg",     ;linha8
-           db "ijklmnopqrstuvwxyzabcdefgh",     ;linha9
-           db "jklmnopqrstuvwxyzabcdefghi",     ;linha10
-           db "klmnopqrstuvwxyzabcdefghij",     ;linha11
-           db "lmnopqrstuvwxyzabcdefghijk",     ;linha12
-           db "mnopqrstuvwxyzabcdefghijkl",     ;linha13
-           db "nopqrstuvwxyzabcdefghijklm",     ;linha14
-           db "opqrstuvwxyzabcdefghijklmn",     ;linha15
-           db "pqrstuvwxyzabcdefghijklmno",     ;linha16
-           db "qrstuvwxyzabcdefghijklmnop",     ;linha17
-           db "rstuvwxyzabcdefghijklmnopq",     ;linha18
-           db "stuvwxyzabcdefghijklmnopqr",     ;linha19
-           db "tuvwxyzabcdefghijklmnopqrs",     ;linha20
-           db "uvwxyzabcdefghijklmnopqrst",     ;linha21
-           db "vwxyzabcdefghijklmnopqrstu",     ;linha22
-           db "wxyzabcdefghijklmnopqrstuv",     ;linha23
-           db "xyzabcdefghijklmnopqrstuvw",     ;linha24
-           db "yzabcdefghijklmnopqrstuvwx",     ;linha25
-           db "zabcdefghijklmnopqrstuvwxy", 0   ;linha26
-    tam equ $-matriz
-
+    sizeMsg equ $-msg
+    sizeKey equ $-key
+    
 section .bss
-    buff resb 32     ;hold the value of one char
-    chave resb 32
-    chaveG resb 32
-    fd_in resb 4
-    fd_out resb 4
+    buff resb 32                ;buffer
+    chave resb 32       
+;    chaveG resb sizeMsg
+;    cifrado resb sizeMsg
+;    decifrado resb sizeMsg
+;    cif resb sizeMsg
+    fd_in resb 1
+    fd_out resb 1
 
 section .text
 global _start
 _start:
 
+openMsg:
     ;open file
-    mov eax, 5
-    mov ebx, msg
-    mov ecx, 0
+    mov eax, 5                  ;open
+    mov ebx, msg                ;file pointer
+    mov ecx, 0                  ;read only
     mov edx, 0777
     int 0x80
 
     mov [fd_in], eax
 
+readMsg:
     ;read from file
     mov eax, 3
     mov ebx, [fd_in]
@@ -57,11 +37,13 @@ _start:
     mov edx, 32
     int 0x80
 
-    ;close the file
+closeMsg:
+    ;close key
     mov eax, 6
     mov ebx, [fd_in]
     int 0x80
 
+openKey:
     ;open key
     mov eax, 5
     mov ebx, key
@@ -71,6 +53,7 @@ _start:
 
     mov [fd_in], eax
 
+readKey:
     ;read key
     mov eax, 3
     mov ebx, [fd_in]
@@ -78,25 +61,85 @@ _start:
     mov edx, 32
     int 0x80
 
+closeKey:
     ;close key
     mov eax, 6
     mov ebx, [fd_in]
     int 0x80
 
+create_out:
+;create file
+    mov eax, 8
+    mov ebx, file_out
+    mov ecx, 0666q
+    int 0x80
+
+    mov [fd_out], eax
+
+    ;write into file
+    mov eax, 4
+    mov edx, sizeMsg            ;tam
+    mov ecx, buff
+    mov ebx, [fd_out]
+    int 0x80
+
+closeOut:
+    mov eax, 6
+    mov ebx, [fd_out]
+
+printMsg:
     ;print msg
     mov eax, 4
     mov ebx, 1
     mov ecx, buff
-    mov edx, 32
+    mov edx, sizeMsg
     int 0x80
 
+printKey:
     ;print key
     mov eax, 4
     mov ebx, 1
     mov ecx, chave
-    mov edx, 32
+    mov edx, sizeKey
     int 0x80
 
+;encrypt:
+;    xor esi, esi
+;    laco:
+;    mov eax, [buff+(esi)]       ;eax = T[i]
+;    mov ebx, [cif+(esi)]        ;eb = K[i]
+;    mov ecx, sizeMsg            ;tam
+;    add eax, ebx                ;eax = T[i]+K[i]
+
+;    mov edi, 26                 ;mod(26)
+;    modulo:
+;    mov edx, 0
+;    div edi
+;    mov eax, edx
+    
+;    mov [cifrado+esi], eax
+;    inc esi
+;    loop laco
+
+;decrypt:
+;    xor esi, esi
+;    laco2:
+;    mov eax, [cifrado+(esi)]    ;eax = C[i]
+;    mov ebx, [cif+(esi)]        ;eb = K[i]
+;    mov ecx, sizeMsg            ;tam
+;    sub eax, ebx                ;eax = T[i]+K[i]
+
+;    mov edi, 26                ;mod(26)
+;    mod:
+;    mov edx, 0
+;    div edi
+;    mov eax, edx
+    
+;    mov [decifrado+esi], eax
+;    inc esi
+;    loop laco2
+
+exit:
     ;exit
     mov eax, 1
     int 0x80

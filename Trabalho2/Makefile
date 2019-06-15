@@ -9,3 +9,6 @@ trab: trab.o
 clean:
 	@rm -f *.o trab
 
+.dump: clean
+	@rm -f saida.txt
+
