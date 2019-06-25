@@ -21,3 +21,14 @@ mul.o:
 mul: mul.o
 	ld -m elf_i386 -s -o mul mul.o
 
+fatorial.o:
+	nasm -f elf fatorial.asm
+
+fatorial: fatorial.o
+	ld -m elf_i386 -s -o fatorial fatorial.o
+
+pot.o:
+	nasm -f elf pot.asm
+
+pot: pot.o
+	ld -m elf_i386 -s -o pot pot.o

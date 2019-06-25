@@ -1,12 +1,14 @@
 section .bss
     string resb 1
-section .text
-global _start
 
+section .text
+
+global _start
 _start:
     push 5
+    push 3
     call sum
-    
+   
     add eax, 48
     mov [string], eax
     
@@ -21,19 +23,9 @@ _start:
 sum:
     push ebp
     mov ebp, esp
-    mov ecx, [ebp+8]
-    cmp ecx, 1
-    je base
-    dec ecx
-    call sum
-    inc ecx
-    add eax, ecx
-
-base:
-    mov eax, 1
-
+    mov eax, [ebp+8]
+    add eax, [ebp+12]
     jmp end
-
 end:
     pop ebp
-    ret 4
+    ret 8
