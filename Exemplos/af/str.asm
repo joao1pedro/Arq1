@@ -1,5 +1,5 @@
 section .data
-    string db "teste",0
+    string db "teste inversao de string",0
     size equ ($-string-1)
 
 section .bss

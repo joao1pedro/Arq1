@@ -1,6 +1,9 @@
 section .data
-    string db "ola mundo", 0
+    string db "jesus", 0
     size equ $-string
+
+section .bss
+    counter resb 1
 
 section .text
 
@@ -35,10 +38,13 @@ vogais:
     inc esi
     loop vogais
 
-    mov ecx, eax
+    add eax, 48
+    mov [counter], eax
+
     mov ebx, 1
-    mov eax, 1
+    mov eax, 4
     mov edx, 1
+    mov ecx, counter
     int 0x80
 
 exit:
