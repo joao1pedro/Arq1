@@ -1,72 +1,46 @@
 section .data
-    msg1 db "Digite um número: "
-    len1 equ $-msg1
-    msg2 db "Digite outro número: "
-    len2 equ $-msg2
-    msgRes db "Resultado: "
-    len_res equ $-msgRes
+	requestText: db 'Please enter integer!', 10 ;'text plus linefeed character'
+	requestTextLen: equ $-requestText ;set the length of requestText.
 
-section .bss
-    num1 resb 4
-    num2 resb 4
-    res resb 4
+section .bss	
+	inputSum resb 4
 
 section .text
-global _start
+	global _start
 
-_start:
+_start:	
+	call askIntegerAndRead
+	mov al, byte [inputSum] 	;Stores the first given value to esi.
+	sub al, 48
+	call askIntegerAndRead
+	mov dl, byte [inputSum]
+	sub dl, 48
+	add al, dl			;Calculate the inputed sum.
+	add eax, 48
+	mov [inputSum], eax
 
-    ;mostra mensagem na tela
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, msg1
-    mov edx, len1
-    int 0x80
+	mov ecx, inputSum	;Set the inputSum address for write.	
+	mov eax, 4		;The system call for write.	
+	int 80h			;"Call" for write.
 
-    ;pegando valor 1
-    mov eax, 3  ;receber valor
-    mov ebx, 2  ;input
-    mov edx, 1
-    mov ecx, num1
-    int 0x80
+	call exit
 
-    ;segunda mensagem
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, msg2
-    mov edx, len2
-    int 0x80
 
-    ;input valor 2
-    mov eax, 3
-    mov ebx, 2
-    mov ecx, num2
-    mov edx, 1
-    int 0x80
+;Asks for integer and reads from standard input.
+askIntegerAndRead:
+	mov eax, 4 		;The system call number for write (sys_write)
+	mov ebx, 1 		;File descriptor 1 -standard output
+	mov ecx, requestText 	;Copy the offset 
+	mov edx, requestTextLen ;Copy the length to edx, is constant since defined equ so no need for []
+	int 80h 		;Call the kernel by initiating the interrupt
+	mov eax, 3		;The system call number for read (sys_read)
+	mov ecx, inputSum		;ecx should contain the variables address for read value, here we set it
+	int 80h
+	ret
 
-    ;result
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, msgRes
-    mov edx, len_res
-    int 0x80
+;Calls for exit for this process.
+exit:
+	mov eax, 1 		;System call number for exit (sys_exit)
+	mov ebx, 0 		;Copy the return code for exit (0=no error)
+	int 80h			;Call the kernel again :-)
 
-    ;realizando soma
-    mov bl, [num1]
-    mov al, [num2]
-
-    sub bl, '0' ;converter char em ASCII
-
-    add al, bl  ;soma
-    mov [res], al
-
-    ;resultado
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, res
-    mov edx, 1
-    int 0x80
-
-    ;exit
-    mov eax, 1
-    int 0x80
